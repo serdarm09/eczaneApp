@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='image/images.png') }}">
+    <title>Nöbetçi Eczane Bulucu</title>
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+
+<body>
+    <main class="container">
+        <header class="header">
+            <div class="logo">
+                <img src="{{ url_for('static', filename='image/images.png') }}" alt="Logo" width="48" height="48">
+                <h1>Nöbetçi Eczaneler</h1>
+            </div>
+            <p class="subtitle">İl seçin arayın ve ardından sıralanan listeden ilçenizi seçerek size en yakın nöbetçi
+                eczaneyi kolayca bulun.</p>
+        </header>
+
+        <section class="search-section glass-panel">
+            <div class="input-group">
+                <label for="dateSelect"><i class="ph ph-calendar-blank"></i> Tarih Seçiniz</label>
+                <div class="select-wrapper">
+                    <input type="date" id="dateSelect" class="date-input">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="citySelect"><i class="ph ph-map-pin"></i> İl Seçiniz</label>
+                <div class="select-wrapper">
+                    <select id="citySelect">
+                        <option value="" disabled selected>Şehir seçin...</option>
+                        <!-- Cities will be loaded via JS -->
+                    </select>
+                    <i class="ph ph-caret-down select-icon"></i>
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label for="districtSelect"><i class="ph ph-buildings"></i> İlçe Seçiniz</label>
+                <div class="select-wrapper">
+                    <select id="districtSelect" disabled>
+                        <option value="" disabled selected>Önce şehir seçin...</option>
+                    </select>
+                    <i class="ph ph-caret-down select-icon"></i>
+                </div>
+            </div>
+
+            <button id="searchBtn" class="primary-btn" disabled>
+                <i class="ph ph-magnifying-glass"></i> Eczaneleri Bul
+            </button>
+        </section>
+
+        <section id="loadingSection" class="loading-state hidden">
+            <div class="spinner"></div>
+            <p>Eczaneler aranıyor, lütfen bekleyin...</p>
+        </section>
+
+        <section id="resultsSection" class="results-section hidden">
+            <div class="results-header">
+                <h2 id="resultsTitle">Nöbetçi Eczaneler</h2>
+                <span class="results-count badge">0 Eczane</span>
+            </div>
+
+            <div class="detailed-search">
+                <input type="text" id="textSearchInput" placeholder="Eczane Adı veya Adres ara..." autocomplete="off">
+            </div>
+
+            <div id="pharmaciesGrid" class="pharmacies-grid">
+                <!-- Cards will be dynamically injected here -->
+            </div>
+        </section>
+
+        <section id="emptyState" class="empty-state hidden glass-panel">
+            <i class="ph ph-magnifying-glass-minus"></i>
+            <h3>Sonuç Bulunamadı</h3>
+            <p>Seçtiğiniz kriterlere uygun nöbetçi eczane bulunamadı.</p>
+        </section>
+
+        <section id="errorState" class="error-state hidden glass-panel">
+            <i class="ph ph-warning-circle"></i>
+            <h3>Bir Hata Oluştu</h3>
+            <p id="errorMessage">Sistemle bağlantı kurulamadı.</p>
+        </section>
+    </main>
+
+    <footer>
+        <p>Veriler e-Devlet Kapısı üzerinden sağlanmaktadır.</p>
+    </footer>
+
+    <!-- Custom JS -->
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+
+</html>
