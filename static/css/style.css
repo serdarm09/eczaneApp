@@ -1,17 +1,27 @@
 :root {
     /* Color Palette - White, Black, Red Theme */
-    --bg-dark: #ffffff; /* Ana Arka Plan: Beyaz */
-    --bg-darker: #ffffff; /* Dropdown Seçenekleri vs. */
-    --primary: #dc2626; /* Deep Red */
+    --bg-dark: #ffffff;
+    /* Ana Arka Plan: Beyaz */
+    --bg-darker: #ffffff;
+    /* Dropdown Seçenekleri vs. */
+    --primary: #dc2626;
+    /* Deep Red */
     --primary-glow: rgba(220, 38, 38, 0.4);
-    --secondary: #000000; /* Black (Vurgu, Başlıklar vs) */
-    --text-main: #000000; /* Siyah Metin */
-    --text-muted: #666666; /* Gri Metin */
-    --glass-bg: #ffffff; /* Kartların Arka Planı: Beyaz */
-    --glass-border: #e5e5e5; /* İnce Gri Kenarlık */
-    --card-hover: #f9fafb; /* Çok Hafif Gri Hover Etkisi */
+    --secondary: #000000;
+    /* Black (Vurgu, Başlıklar vs) */
+    --text-main: #000000;
+    /* Siyah Metin */
+    --text-muted: #666666;
+    /* Gri Metin */
+    --glass-bg: #ffffff;
+    /* Kartların Arka Planı: Beyaz */
+    --glass-border: #e5e5e5;
+    /* İnce Gri Kenarlık */
+    --card-hover: #f9fafb;
+    /* Çok Hafif Gri Hover Etkisi */
     --danger: #ef4444;
-    
+
+
     /* Layout - Sharp Edges */
     --radius-lg: 0px;
     --radius-md: 0px;
@@ -137,7 +147,8 @@ body {
     position: relative;
 }
 
-select, .date-input {
+select,
+.date-input {
     width: 100%;
     appearance: none;
     background: #ffffff;
@@ -151,11 +162,13 @@ select, .date-input {
     outline: none;
 }
 
-select:focus, .date-input:focus {
+select:focus,
+.date-input:focus {
     border-color: var(--primary);
 }
 
-select:disabled, .date-input:disabled {
+select:disabled,
+.date-input:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background: #f3f4f6;
@@ -199,7 +212,8 @@ select option {
 }
 
 .primary-btn:hover:not(:disabled) {
-    background: #b91c1c; /* Darker red */
+    background: #b91c1c;
+    /* Darker red */
 }
 
 .primary-btn:disabled {
@@ -213,7 +227,9 @@ select option {
     display: none !important;
 }
 
-.loading-state, .empty-state, .error-state {
+.loading-state,
+.empty-state,
+.error-state {
     text-align: center;
     padding: 4rem 2rem;
     display: flex;
@@ -232,10 +248,13 @@ select option {
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    to {
+        transform: rotate(360deg);
+    }
 }
 
-.empty-state i, .error-state i {
+.empty-state i,
+.error-state i {
     font-size: 4rem;
     color: var(--text-muted);
     margin-bottom: 1rem;
@@ -401,11 +420,11 @@ footer {
         flex-direction: column;
         align-items: stretch;
     }
-    
+
     .primary-btn {
         justify-content: center;
     }
-    
+
     .logo h1 {
         font-size: 2rem;
     }

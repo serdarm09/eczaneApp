@@ -34,12 +34,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const dateSelect = document.getElementById('dateSelect');
     const searchBtn = document.getElementById('searchBtn');
     const textSearchInput = document.getElementById('textSearchInput');
-    
+
     const loadingSection = document.getElementById('loadingSection');
     const resultsSection = document.getElementById('resultsSection');
     const emptyState = document.getElementById('emptyState');
     const errorState = document.getElementById('errorState');
-    
+
     const pharmaciesGrid = document.getElementById('pharmaciesGrid');
     const resultsCount = document.querySelector('.results-count');
     const errorMessage = document.getElementById('errorMessage');
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const mm = String(today.getMonth() + 1).padStart(2, '0');
     const dd = String(today.getDate()).padStart(2, '0');
     const todayStr = `${yyyy}-${mm}-${dd}`;
-    
+
     dateSelect.min = todayStr;
     dateSelect.value = todayStr;
 
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     citySelect.addEventListener('change', () => {
         validateSearchForm();
-        
+
         // Yeni bir il seçildiğinde eski arama verilerini ve ilçe seçimini anında sıfırla
         districtSelect.innerHTML = '<option value="" disabled selected>Önce şehir seçin...</option>';
         districtSelect.disabled = true;
@@ -104,20 +104,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function applyFilters() {
         const selectedDistrict = districtSelect.value;
         const searchText = textSearchInput.value.toLowerCase();
-        
+
         let filtered = allPharmacies;
-        
+
         if (selectedDistrict !== 'all') {
             filtered = filtered.filter(p => p.district === selectedDistrict);
         }
-        
+
         if (searchText) {
-            filtered = filtered.filter(p => 
-                p.name.toLowerCase().includes(searchText) || 
+            filtered = filtered.filter(p =>
+                p.name.toLowerCase().includes(searchText) ||
                 p.address.toLowerCase().includes(searchText)
             );
         }
-        
+
         renderPharmacies(filtered);
     }
 
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
     searchBtn.addEventListener('click', async () => {
         const cityCode = citySelect.value;
         const dateValue = dateSelect.value;
-        
+
         if (!cityCode || !dateValue) {
             alert('Lütfen hem il hem de tarih seçtiğinizden emin olun.');
             return;
@@ -156,8 +156,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(data.error || 'Sunucu hatası oluştu');
             }
 
+
             allPharmacies = data.pharmacies || [];
-            
+
             if (allPharmacies.length === 0) {
                 hideAllStates();
                 emptyState.classList.remove('hidden');
@@ -165,9 +166,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Populate Districts
                 currentDistricts.clear();
                 allPharmacies.forEach(p => currentDistricts.add(p.district));
-                
-                populateDistricts(Array.from(currentDistricts).sort((a,b) => a.localeCompare(b, 'tr')));
-                
+
+                populateDistricts(Array.from(currentDistricts).sort((a, b) => a.localeCompare(b, 'tr')));
+
                 hideAllStates();
                 textSearchInput.value = ''; // Reset text search on new city
                 resultsSection.classList.remove('hidden');
@@ -215,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
         pharmacies.forEach(p => {
             const card = document.createElement('div');
             card.className = 'pharmacy-card';
-            
+
             card.innerHTML = `
                 <div class="card-header">
                     <h3 class="card-title">${p.name}</h3>
@@ -246,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     `}
                 </div>
             `;
-            
+
             pharmaciesGrid.appendChild(card);
         });
     }

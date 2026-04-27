@@ -148,3 +148,5 @@ def get_pharmacies():
 if __name__ == '__main__':
     # debug=True: Kod değiştiğinde sunucu kendini yeniden başlatır (Geliştirme için iyi)
     app.run(debug=True, port=5000)
+
+    
