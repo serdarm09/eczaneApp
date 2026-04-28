@@ -3,6 +3,7 @@ import requests
 from bs4 import BeautifulSoup
 import datetime
 import urllib3
+from urllib.parse import urlparse, parse_qs
 # github.com/serdarm09
 # Disable SSL uyarılarını kapat
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -97,21 +98,46 @@ def fetch_pharmacies(city_code, target_date=None):
                     # 4. Sütun: Adres
                     address = cols[3].get_text(strip=True)
                     
-                    # 5. Sütun (Eğer varsa): Haritada göster linki
+                    # 5. Sütun (Eğer varsa): Haritada göster linki + koordinat çıkarma
                     map_link = ""
+                    latitude = None
+                    longitude = None
                     if len(cols) >= 5:
                         map_a = cols[4].find('a')
                         if map_a and map_a.get('href'):
-                            # Link "https" ile başlamadığı için başına turkiye.gov.tr ekliyoruz
-                            map_link = "https://www.turkiye.gov.tr" + map_a.get('href')
+                            href = map_a.get('href')
+                            map_link = "https://www.turkiye.gov.tr" + href
+                            # Href içinden koordinat parametrelerini çıkarmayı dene
+                            try:
+                                parsed = urlparse(href)
+                                params = parse_qs(parsed.query)
+                                lat_keys = ['lat', 'latitude', 'enlem', 'y', 'koordinatX']
+                                lng_keys = ['lng', 'lon', 'longitude', 'boylam', 'x', 'koordinatY']
+                                for lk in lat_keys:
+                                    if lk in params:
+                                        latitude = float(params[lk][0])
+                                        break
+                                for lk in lng_keys:
+                                    if lk in params:
+                                        longitude = float(params[lk][0])
+                                        break
+                                # "koordinat=lat,lng" formatını dene
+                                if latitude is None and 'koordinat' in params:
+                                    parts = params['koordinat'][0].split(',')
+                                    if len(parts) == 2:
+                                        latitude = float(parts[0])
+                                        longitude = float(parts[1])
+                            except Exception:
+                                pass
 
-                    # Temizlediğimiz veriyi bir Sözlük (Dictionary) objesi olarak listemize ekliyoruz
                     pharmacies.append({
                         "name": name,
                         "district": district,
                         "phone": phone,
                         "address": address,
-                        "map_link": map_link
+                        "map_link": map_link,
+                        "latitude": latitude,
+                        "longitude": longitude
                     })
     
     # Sonuçları API'nin döndüreceği şekilde objeye çevirip geri dönüyoruz
