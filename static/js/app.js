@@ -305,30 +305,15 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function buildMapUrl(p) {
-        // 1. Koordinat varsa direkt Google Maps pin
+        // Backend koordinatlı map_link döndürüyorsa direkt kullan
+        if (p.map_link) {
+            return p.map_link;
+        }
+        // Koordinatlar varsa Google Maps pin
         if (p.latitude && p.longitude) {
             return `https://www.google.com/maps?q=${p.latitude},${p.longitude}`;
         }
-        // 2. e-Devlet linkinden koordinat çıkarmayı JS tarafında dene
-        if (p.map_link) {
-            try {
-                const url = new URL(p.map_link);
-                const params = url.searchParams;
-                const latKeys = ['lat', 'latitude', 'enlem', 'y', 'koordinatX'];
-                const lngKeys = ['lng', 'lon', 'longitude', 'boylam', 'x', 'koordinatY'];
-                let lat = null, lng = null;
-                for (const k of latKeys) { if (params.has(k)) { lat = params.get(k); break; } }
-                for (const k of lngKeys) { if (params.has(k)) { lng = params.get(k); break; } }
-                if (!lat && params.has('koordinat')) {
-                    const parts = params.get('koordinat').split(',');
-                    if (parts.length === 2) { lat = parts[0]; lng = parts[1]; }
-                }
-                if (lat && lng) {
-                    return `https://www.google.com/maps?q=${lat},${lng}`;
-                }
-            } catch (_) {}
-        }
-        // 3. Adres + eczane adı ile arama
+        // Fallback: adres ile arama
         const query = `${p.name} Eczanesi ${p.district} ${p.address}`;
         return `https://www.google.com/maps/search/${encodeURIComponent(query)}`;
     }

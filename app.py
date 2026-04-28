@@ -3,7 +3,9 @@ import requests
 from bs4 import BeautifulSoup
 import datetime
 import urllib3
+import re
 from urllib.parse import urlparse, parse_qs
+from concurrent.futures import ThreadPoolExecutor, as_completed
 # github.com/serdarm09
 # Disable SSL uyarılarını kapat
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -98,49 +100,69 @@ def fetch_pharmacies(city_code, target_date=None):
                     # 4. Sütun: Adres
                     address = cols[3].get_text(strip=True)
                     
-                    # 5. Sütun (Eğer varsa): Haritada göster linki + koordinat çıkarma
-                    map_link = ""
-                    latitude = None
-                    longitude = None
+                    # 5. Sütun (Eğer varsa): Haritada göster linki + index
+                    harita_index = None
                     if len(cols) >= 5:
                         map_a = cols[4].find('a')
                         if map_a and map_a.get('href'):
                             href = map_a.get('href')
-                            map_link = "https://www.turkiye.gov.tr" + href
-                            # Href içinden koordinat parametrelerini çıkarmayı dene
-                            try:
-                                parsed = urlparse(href)
-                                params = parse_qs(parsed.query)
-                                lat_keys = ['lat', 'latitude', 'enlem', 'y', 'koordinatX']
-                                lng_keys = ['lng', 'lon', 'longitude', 'boylam', 'x', 'koordinatY']
-                                for lk in lat_keys:
-                                    if lk in params:
-                                        latitude = float(params[lk][0])
-                                        break
-                                for lk in lng_keys:
-                                    if lk in params:
-                                        longitude = float(params[lk][0])
-                                        break
-                                # "koordinat=lat,lng" formatını dene
-                                if latitude is None and 'koordinat' in params:
-                                    parts = params['koordinat'][0].split(',')
-                                    if len(parts) == 2:
-                                        latitude = float(parts[0])
-                                        longitude = float(parts[1])
-                            except Exception:
-                                pass
+                            parsed = urlparse(href)
+                            params = parse_qs(parsed.query)
+                            if 'index' in params:
+                                try:
+                                    harita_index = int(params['index'][0])
+                                except Exception:
+                                    pass
 
                     pharmacies.append({
                         "name": name,
                         "district": district,
                         "phone": phone,
                         "address": address,
-                        "map_link": map_link,
-                        "latitude": latitude,
-                        "longitude": longitude
+                        "map_link": "",
+                        "latitude": None,
+                        "longitude": None,
+                        "_harita_index": harita_index
                     })
     
-    # Sonuçları API'nin döndüreceği şekilde objeye çevirip geri dönüyoruz
+    # Koordinatları paralel olarak harita sayfalarından çek
+    harita_base = url
+    harita_headers = headers.copy()
+    harita_headers['Referer'] = url
+
+    def fetch_coord(index):
+        try:
+            h_url = f"{harita_base}?harita=Goster&index={index}"
+            hr = session.get(h_url, headers=harita_headers, verify=False, timeout=8)
+            lat_m = re.search(r'latti\s*=\s*parseFloat\(([0-9.]+)\)', hr.text)
+            lng_m = re.search(r'longi\s*=\s*parseFloat\(([0-9.]+)\)', hr.text)
+            if lat_m and lng_m:
+                return index, float(lat_m.group(1)), float(lng_m.group(1))
+        except Exception:
+            pass
+        return index, None, None
+
+    indices = [(i, p['_harita_index']) for i, p in enumerate(pharmacies) if p['_harita_index'] is not None]
+
+    if indices:
+        with ThreadPoolExecutor(max_workers=15) as executor:
+            futures = {executor.submit(fetch_coord, harita_idx): pharm_idx for pharm_idx, harita_idx in indices}
+            coord_map = {}
+            for future in as_completed(futures):
+                pharm_idx = futures[future]
+                _, lat, lng = future.result()
+                coord_map[pharm_idx] = (lat, lng)
+
+        for pharm_idx, (lat, lng) in coord_map.items():
+            pharmacies[pharm_idx]['latitude'] = lat
+            pharmacies[pharm_idx]['longitude'] = lng
+            if lat and lng:
+                pharmacies[pharm_idx]['map_link'] = f"https://www.google.com/maps?q={lat},{lng}"
+
+    # _harita_index alanını temizle
+    for p in pharmacies:
+        p.pop('_harita_index', None)
+
     return {"pharmacies": pharmacies}
 
 
